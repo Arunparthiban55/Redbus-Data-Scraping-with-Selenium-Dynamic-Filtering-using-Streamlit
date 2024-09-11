@@ -26,7 +26,7 @@ This project automates the collection, analysis, and visualization of bus travel
 ## Installation and Setup
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/redbus-data-scraping.git
+   git clone https://github.com/Arunparthiban55/Redbus-Data-Scraping-with-Selenium-Dynamic-Filtering-using-Streamlit/tree/main
    ```
 2. Install required packages:
    ```
