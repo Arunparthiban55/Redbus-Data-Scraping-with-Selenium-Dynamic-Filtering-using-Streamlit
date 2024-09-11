@@ -46,7 +46,7 @@ This project automates the collection, analysis, and visualization of bus travel
 3. Use the sidebar to select preferences and filter bus options
 
 ## Screenshots
-![Redbus Streamlit Application](path/to/your/screenshot.png)
+![Redbus Streamlit Application](main page.png)
 
 ## Future Improvements
 - Implement real-time data updates
