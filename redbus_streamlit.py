@@ -53,8 +53,67 @@ route=st.sidebar.selectbox("**Trip Route**",list(df["routes_name"][df["state_tra
 
 lin=df['route_link'][df["routes_name"]==route].item()
 
-type=st.sidebar.selectbox("**Bus Type**",list(df2["bus_type"][df2["route_link"]==lin].unique()),placeholder="Choose an option")
-rating=st.sidebar.selectbox("**Star Rating**",(1,2,3,4,5))
+ty=list(df2["bus_type"][df2["route_link"]==lin].unique())
+bus=[]
+for i in ty:
+    if "SEEPER" in i or 'Sleeper' in i:
+        bus.append('SLEEPER') 
+    if "AC" in i or 'A/C' in i or 'A.C' in i:
+        bus.append('AC')
+    if 'NON' in i or 'Non' in i:
+        bus.append('NON-AC')                    
+type=st.sidebar.selectbox("**Bus Type**",set(bus),placeholder="Choose an option")
+# grouping all bus type by ac,non ac , sleeper since data bus type is is different
+if type=='SLEEPER':
+    bus_ty=[i for i in ty if "SEEPER" in i or 'Sleeper' in i]
+elif type=='AC':
+    bus_ty=[]
+    for i in ty:
+        if 'NON' not in i or 'Non' not in i:
+            if "AC" in i or 'A/C' in i or 'A.C' in i:
+                bus_ty.append(i)
+elif type=='NON-AC':
+    bus_ty=[j for j in ty if 'NON' in j or 'Non' in j]                
+
+rat_lis=list(df2["star_rating"][(df2["route_link"]==lin) & (df2["bus_type"].isin(bus_ty))].unique())
+rat_lis.sort()
+rating=st.sidebar.selectbox("**Star Rating**",rat_lis)
+
+pr_lis=list(df2["price"][(df2["route_link"]==lin) & (df2["bus_type"].isin(bus_ty)) | (df2["star_rating"]>=rating)])
+pr_lis.sort()
+pr_lis=[int(i) for i in pr_lis]
+a=min(pr_lis)
+for i in range(1,1000):
+    if (a-i)%100==0:
+        a=int(a-i)
+        break
+b=max(pr_lis)
+for i in range(1,1000):
+     if (b-i)%100==0:
+        b=int(b-i)
+        break
+pr_range=[]
+for i in range(a,b,500):
+    if (b-a)>100:
+        pr_range.append(f'{i}-{i+500}')
+    elif (b-a)<=100:
+        pr_range.append(f'{b}') 
+    elif a==b:
+        pr_range.append(f'{b}')
+   
+price=st.sidebar.selectbox("**Price Range**",pr_range)
+if '-' in price:
+    a,b=map(int,price.split('-'))
+else:
+    a=0
+
+st_lis=list(set(df2["departing_time"][(df2["route_link"]==lin) & (df2["bus_type"].isin(bus_ty)) & (df2["star_rating"]>=rating) & (df2['price'] >= a) & (df2['price'] <= b) ]))
+st_lis.sort()
+depart=st.sidebar.selectbox("**Departing Time**",st_lis,placeholder="Choose an option")
+
+re_lis=list(set(df2["reaching_time"][(df2["route_link"]==lin) & (df2["bus_type"].isin(bus_ty)) & (df2["star_rating"]>=rating) & (df2['price'] >= a) & (df2['price'] <= b) & (df2['departing_time']>=depart)]))
+re_lis.sort()
+reach=st.sidebar.selectbox("**Reaching Time**",re_lis,placeholder="Choose an option")
 
 bus_button=st.sidebar.button("**Find Buses**")
 #\sidebar
@@ -65,7 +124,7 @@ if bus_button:
     last=df['last_bus'][df["routes_name"]==route].item()
     min_fare=df['Starting_Price'][df["routes_name"]==route].item()
     
-    outdf = df2[(df2['route_link']==lin) & (df2['bus_type']==type) & (df2['star_rating']>=rating)]
+    outdf = df2[(df2['route_link']==lin) & (df2['bus_type'].isin(bus_ty)) & (df2['price'] >= a) & (df2['price'] <= b) & (df2['star_rating']>=rating) & (df2['departing_time']>=depart) & (df2['reaching_time']>=reach)]
     tot_bus=len(outdf)
 
     st.markdown(f"<h3 style='text-align: center; color: white;'>Since your route is {route} try to plan your trip between {start}am to {last}pm </h3>", unsafe_allow_html=True)
